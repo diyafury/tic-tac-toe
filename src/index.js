@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import 'https://diyafury.github.io/works/css/base.css';
+import './base.css';
 
 function Square(props) {
     return (
