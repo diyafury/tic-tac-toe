@@ -5,7 +5,7 @@ import './index.css';
 function Square(props) {
     return (
         <button 
-            className="square" 
+            className={props.className} 
             onClick={() => props.onClick()}
         >
             {props.value}
@@ -19,6 +19,7 @@ class Board extends React.Component {
         return (
             <Square 
                 value={this.props.squares[i]} 
+                className={ (i === this.props.lastMoveIdx) ? 'square active' : 'square' }
                 onClick={() => this.props.onClick(i) }    
             />
         );
@@ -53,6 +54,7 @@ class Game extends React.Component {
         this.state = {
             history: [{
                 squares: Array(9).fill(null),
+                lastMove: []
             }],
             stepNumber: 0,
             xIsNext: true,
@@ -63,11 +65,14 @@ class Game extends React.Component {
         const history = this.state.history.slice(0, this.state.stepNumber + 1);
         const current = history[history.length - 1];
         const squares = current.squares.slice(); //creates a copy of the array to edit /immutability
+        let lastMove = current.lastMove;
         if (calculateWinner(squares) || squares[i]) return;
         squares[i] = this.state.xIsNext ? 'X' : 'O';
+        lastMove = { idx: i, col: (i % 3) + 1, row: Math.floor((i) / 3) + 1 };
         this.setState( {
             history: history.concat([{
                 squares: squares,
+                lastMove: lastMove
             }]),
             stepNumber: history.length,
             xIsNext: !this.state.xIsNext
@@ -89,8 +94,8 @@ class Game extends React.Component {
 
         const moves = history.map( (step, move) => {
             const desc = move ?
-                'Go to move #' + move :
-                'Go to game start';
+                'Go to move #' + move + ': [' + step.lastMove['col'] + ', ' + step.lastMove['row'] + ']':
+                'Go to game start, key: [col, row]';
             return (
                 <li key={move}>
                     <button onClick={ () => this.jumpTo(move) }>{ desc }</button>
@@ -103,6 +108,7 @@ class Game extends React.Component {
                 <div className="game-board">
                     <Board 
                         squares = { current.squares }
+                        lastMoveIdx = { current.lastMove['idx'] }
                         onClick = { (i) => this.handleClick(i) }
                     />
                 </div>
