@@ -51,4 +51,17 @@ ol, ul {
   
 .game-info {
     margin-left: 20px;
-}  
+}
+
+.toggle-order {
+    margin: 1em 0;
+    float: right;
+}
+
+.toggle-order.desc::after {
+    content: '\2002\21E9';
+}
+
+.toggle-order.asc::after {
+    content: '\2002\21E7';
+}

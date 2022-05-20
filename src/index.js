@@ -12,6 +12,34 @@ function Square(props) {
         </button>
     );
 }
+
+class ToggleOrderBtn extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            direction: 'DESC',
+        };
+    }
+
+    render() {
+        let direction = this.state.direction;
+        let className = "toggle-order " + direction.toLowerCase();
+        return (
+            <button 
+                className={ className } 
+                onClick={() => {
+                    this.setState({ direction: (direction === 'DESC') ? 'ASC' : 'DESC' });
+                    this.props.onClick()
+                }}
+                title={direction}
+            >
+                Order
+            </button>
+        );
+    }
+    
+}
   
 class Board extends React.Component {
 
@@ -75,13 +103,21 @@ class Board extends React.Component {
 class Game extends React.Component {
     constructor(props) {
         super(props);
+        const history = [{
+            squares: Array(9).fill(null),
+            lastMove: []
+        }];
         this.state = {
-            history: [{
-                squares: Array(9).fill(null),
-                lastMove: []
-            }],
+            history: history,
             stepNumber: 0,
             xIsNext: true,
+            moves: history.map( (step, move) => {
+                return (
+                    <li key="0">
+                        <button onClick={ () => this.jumpTo(0) }>Go to game start, key: [col, row]</button>
+                    </li>
+                );
+            } )
         }
     }
 
@@ -99,8 +135,25 @@ class Game extends React.Component {
                 lastMove: lastMove
             }]),
             stepNumber: history.length,
-            xIsNext: !this.state.xIsNext
-        } )
+            xIsNext: !this.state.xIsNext,
+            moves: this.state.history.map( (step, move) => {
+                const desc = move ?
+                    'Go to move #' + move + ': [' + step.lastMove['col'] + ', ' + step.lastMove['row'] + ']':
+                    'Go to game start, key: [col, row]';
+                return (
+                    <li key={move}>
+                        <button onClick={ () => this.jumpTo(move) }>{ desc }</button>
+                    </li>
+                );
+            } )
+        } );
+    }
+
+    handleOrderToggle() {
+        const moves = [...this.state.moves];
+        this.setState({
+            moves: moves.reverse()
+        });
     }
 
     jumpTo(step) {
@@ -122,17 +175,6 @@ class Game extends React.Component {
             //console.log('LINE:', gameIsWon.line);
         }
 
-        const moves = history.map( (step, move) => {
-            const desc = move ?
-                'Go to move #' + move + ': [' + step.lastMove['col'] + ', ' + step.lastMove['row'] + ']':
-                'Go to game start, key: [col, row]';
-            return (
-                <li key={move}>
-                    <button onClick={ () => this.jumpTo(move) }>{ desc }</button>
-                </li>
-            );
-        } );
-
         return (
             <div className="game">
                 <div className="game-board">
@@ -145,7 +187,8 @@ class Game extends React.Component {
                 </div>
                 <div className="game-info">
                     <div>{ status }</div>
-                    <ol>{ moves }</ol>
+                    <ToggleOrderBtn direction="DESC" onClick = { () => this.handleOrderToggle() } />
+                    <ol>{ this.state.moves }</ol>
                 </div>
             </div>
         );
